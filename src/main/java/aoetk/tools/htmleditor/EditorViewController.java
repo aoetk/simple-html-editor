@@ -60,16 +60,15 @@ public class EditorViewController implements Initializable {
     }
 
     public void handlePrintAction(ActionEvent actionEvent) {
-        final FileChooser fileChooser = createFileChooser();
-        openedFile = fileChooser.showSaveDialog(getParentWindow());
-        if (openedFile != null) {
-            saveEditorContent();
-        }
     }
 
     public void handleSaveAsAction(ActionEvent actionEvent) {
-        createNewFile();
-        saveEditorContent();
+        final FileChooser fileChooser = createFileChooser();
+        openedFile = fileChooser.showSaveDialog(getParentWindow());
+        if (openedFile != null) {
+            createNewFile();
+            saveEditorContent();
+        }
     }
 
     private void createNewFile() {
