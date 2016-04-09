@@ -12,8 +12,12 @@ import javafx.stage.Window;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -31,13 +35,16 @@ public class EditorViewController implements Initializable {
     }
 
     public void handleNewFileAction(ActionEvent actionEvent) {
-
+        final FileChooser fileChooser = createFileChooser();
+        openedFile = fileChooser.showSaveDialog(getParentWindow());
+        if (openedFile != null) {
+            createNewFile();
+            editor.setHtmlText("");
+        }
     }
 
     public void handleOpenAction(ActionEvent actionEvent) {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open HTML File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("HTML Files", "*.html", "*.html"));
+        final FileChooser fileChooser = createFileChooser();
         openedFile = fileChooser.showOpenDialog(getParentWindow());
         if (openedFile != null) {
             loadFileContent();
@@ -45,26 +52,71 @@ public class EditorViewController implements Initializable {
     }
 
     public void handleSaveAction(ActionEvent actionEvent) {
-
+        if (openedFile == null) {
+            handleSaveAsAction(actionEvent);
+        } else {
+            saveEditorContent();
+        }
     }
 
     public void handlePrintAction(ActionEvent actionEvent) {
-
+        final FileChooser fileChooser = createFileChooser();
+        openedFile = fileChooser.showSaveDialog(getParentWindow());
+        if (openedFile != null) {
+            saveEditorContent();
+        }
     }
 
     public void handleSaveAsAction(ActionEvent actionEvent) {
+        createNewFile();
+        saveEditorContent();
+    }
 
+    private void createNewFile() {
+        try {
+            Files.createFile(openedFile.toPath());
+        } catch (FileAlreadyExistsException fae) {
+            showAlertDialog("File already exists!");
+        } catch (IOException e) {
+            handleException(e);
+        }
+    }
+
+    private FileChooser createFileChooser() {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open HTML File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("HTML Files", "*.html", "*.html"));
+        return fileChooser;
     }
 
     private void loadFileContent() {
         try {
             byte[] fileContents = Files.readAllBytes(openedFile.toPath());
-            editor.setHtmlText(new String(fileContents, Charset.forName("UTF-8")));
+            editor.setHtmlText(new String(fileContents, StandardCharsets.UTF_8));
         } catch (IOException e) {
-            e.printStackTrace();
-            final Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.OK);
-            alert.showAndWait();
+            handleException(e);
         }
+    }
+
+    private void saveEditorContent() {
+        final List<String> content = Arrays.asList(editor.getHtmlText());
+        try {
+            Files.write(openedFile.toPath(), content, StandardCharsets.UTF_8,
+                    StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException e) {
+            handleException(e);
+        }
+    }
+
+    private void handleException(Exception e) {
+        e.printStackTrace();
+        final String message = e.getMessage();
+        showAlertDialog(message);
+    }
+
+    private void showAlertDialog(String message) {
+        final Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        alert.showAndWait();
     }
 
     private Window getParentWindow() {
