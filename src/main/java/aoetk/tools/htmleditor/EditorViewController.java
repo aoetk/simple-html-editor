@@ -75,7 +75,7 @@ public class EditorViewController implements Initializable {
         try {
             Files.createFile(openedFile.toPath());
         } catch (FileAlreadyExistsException fae) {
-            showAlertDialog("File already exists!");
+            showErrorDialog("File already exists!");
         } catch (IOException e) {
             handleException(e);
         }
@@ -110,10 +110,10 @@ public class EditorViewController implements Initializable {
     private void handleException(Exception e) {
         e.printStackTrace();
         final String message = e.getMessage();
-        showAlertDialog(message);
+        showErrorDialog(message);
     }
 
-    private void showAlertDialog(String message) {
+    private void showErrorDialog(String message) {
         final Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
         alert.showAndWait();
     }
