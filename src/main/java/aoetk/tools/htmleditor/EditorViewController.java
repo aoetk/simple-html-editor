@@ -3,6 +3,7 @@ package aoetk.tools.htmleditor;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.print.PrinterJob;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.web.HTMLEditor;
@@ -60,6 +61,13 @@ public class EditorViewController implements Initializable {
     }
 
     public void handlePrintAction(ActionEvent actionEvent) {
+        final PrinterJob printerJob = PrinterJob.createPrinterJob();
+        if (printerJob == null) {
+            showAlertDialog("Print isn't supported in this environment.");
+        } else if (printerJob.showPrintDialog(getParentWindow())) {
+            editor.print(printerJob);
+            printerJob.endJob();
+        }
     }
 
     public void handleSaveAsAction(ActionEvent actionEvent) {
@@ -115,6 +123,11 @@ public class EditorViewController implements Initializable {
 
     private void showErrorDialog(String message) {
         final Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
+        alert.showAndWait();
+    }
+
+    private void showAlertDialog(String message) {
+        final Alert alert = new Alert(Alert.AlertType.WARNING, message, ButtonType.OK);
         alert.showAndWait();
     }
 
