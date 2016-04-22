@@ -103,6 +103,6 @@
       </VBox>
    </top>
    <center>
-      <HTMLEditor fx:id="editor" htmlText="" prefHeight="200.0" prefWidth="506.0" BorderPane.alignment="CENTER" />
+      <HTMLEditor fx:id="editor" htmlText="" BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>
